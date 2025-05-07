@@ -1,6 +1,6 @@
 # Aspire App - Vue 3 Implementation
 
-This project is a Vue 3 implementation of the Aspire banking application design, following the requirements specified in the challenge.
+This project is a Vue 3 implementation of the Aspire application design, following the requirements specified in the challenge.
 
 ## Features
 
@@ -18,6 +18,7 @@ This project is a Vue 3 implementation of the Aspire banking application design,
 - Pinia for state management
 - Ant Design Vue for UI components
 - Vite for build tooling
+- Oh-my-icons for icons
 
 ## Getting Started
 
@@ -47,7 +48,3 @@ This project is a Vue 3 implementation of the Aspire banking application design,
 - `/src/stores` - Pinia stores for state management
 - `/src/router` - Vue Router configuration
 - `/src/assets` - Static assets
-
-## Credits
-
-This project was created based on the design and requirements provided in the Aspire app challenge.
