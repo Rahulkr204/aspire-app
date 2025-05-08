@@ -1,22 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import { Icon } from "@iconify/vue";
+import { Card } from '../types'
 
-const props = defineProps({
-  card: {
-    type: Object,
-    required: true
-  },
-  isVisible: {
-    type: Boolean,
-    default: false
-  },
-  isActive: {
-    type: Boolean,
-    default: false
-  }
-})
+interface Props {
+  card: Card;
+  isVisible: boolean;
+  isActive: boolean;
+}
 
-const emit = defineEmits(['click'])
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  click: []
+}>()
 
 const cardClassObject = computed(() => {
   return {
@@ -26,187 +23,231 @@ const cardClassObject = computed(() => {
   }
 })
 
-const formattedCardNumber = computed(() => {
-  if (props.isVisible) {
-    return props.card.cardNumber
-  }
-  return '•••• •••• •••• ' + props.card.cardNumber.slice(-4)
-})
 
-const handleClick = () => {
+const handleClick = (): void => {
   emit('click')
+}
+
+const getCardIconByType = (type: string): string => {
+  switch (type) {
+    case 'visa':
+      return 'simple-icons:visa';
+    case 'mastercard':
+      return 'logos:mastercard';
+    case 'amex':
+      return 'logos:amex';
+    default:
+      return 'simple-icons:visa';
+  }
 }
 </script>
 
 <template>
-  <div :class="cardClassObject" @click="handleClick">
-    <div class="card-header">
-      <div class="aspire-logo">
-        <span class="fth-logo mobile-logo">aspire</span>
-      </div>
-      <div v-if="props.card.frozen" class="frozen-badge">FROZEN</div>
-    </div>
+    <div :class="cardClassObject" @click="handleClick">
+        <div class="card-header">
+            <div class="aspire-logo">
+                <span class="fth-logo mobile-logo">aspire</span>
+            </div>
+            <div v-if="props.card.frozen" class="frozen-badge">FROZEN</div>
+        </div>
 
-    <div class="card-holder">{{ card.name }}</div>
+        <div class="card-holder">{{ card.name }}</div>
 
-    <div class="card-number">
-      {{ formattedCardNumber }}
-    </div>
+        <div class="card-number">
+            <div v-if="props.isVisible">
+                {{ props.card.cardNumber }}
+            </div>
+            <div v-else class="dots-container">
+                <div class="dots-section">
+                    <span v-for="dots in Array(4).fill('')" class="dots">
+                    </span>
+                </div>
+                <div class="dots-section">
+                    <span v-for="dots in Array(4).fill('')" class="dots">
+                    </span>
+                </div>
+                <div class="dots-section">
+                    <span v-for="dots in Array(4).fill('')" class="dots">
+                    </span>
+                </div>
+                <span>{{ props.card.cardNumber.slice(-4) }}</span>
+            </div>
 
-    <div class="card-footer">
-      <div class="card-validity">
-        <div class="label">Thru: {{ card.expiryDate }}</div>
-        <div class="label">CVV: {{ card.cvv }}</div>
-      </div>
-      <div class="card-network">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="visa-logo" />
-      </div>
-    </div>
+            <div class="card-validity">
+                <div class="label">Thru: {{ card.expiryDate }}</div>
+                <div class="label cvv">
+                    CVV:
+                    <span v-if="props.isVisible">{{ card.cvv }}</span>
+                    <div v-else style="display: flex; align-items: center;">
+                        <Icon v-for="asterisk in Array(3).fill('')" icon="ix:asterisk" width="20" height="20" style="color: #fff" />
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="user-badge" v-if="isActive">
-      <span>1</span>
+        <div class="card-footer">
+            <div class="card-network">
+                <Icon :icon="getCardIconByType(card.type)" class="card-icon" width="5rem" height="5rem" style="color: #fff" />
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
 .card-component {
-  background-color: #01D167;
-  border-radius: 16px;
-  padding: 20px;
-  color: white;
-  min-width: 300px;
-  max-width: 100%;
-  height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-  position: relative;
-  scroll-snap-align: start;
-  margin-right: 10px;
-}
-
-.card-component.active {
-  transform: scale(1.02);
+    background-color: #01D167;
+    border-radius: 12px;
+    color: white;
+    width: 100%;
+    height: 100%;
+    min-height: 272px;
+    min-width: 496px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+    padding: 0 2rem;
 }
 
 .card-component.frozen {
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.6rem 0;
 }
 
+.dots-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 85%;
+    padding: 0.5rem 0;
+}
+.dots-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 25%;
+    margin-right: 2rem;
+}
+.dots {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #fff;
+}
 .aspire-logo {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
 }
 
 .fth-logo {
-  font-size: 18px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: lowercase;
-  position: relative;
-}
-
-.fth-logo.mobile-logo::before {
-  display: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: lowercase;
+    position: relative;
+    font-size: 1.4rem;
 }
 
 .frozen-badge {
-  background-color: rgba(255, 255, 255, 0.3);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .card-holder {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 16px 0;
+    display: flex;
+    font-size: 2rem;
+    font-weight: bold;
+    flex-basis: 20%;
 }
 
 .card-number {
-  font-size: 14px;
-  letter-spacing: 2px;
-  margin-bottom: 16px;
+    width: auto;
+    font-size: 1.6rem;
+    letter-spacing: 3.4px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    font-size: 1.4rem;
+    font-weight: 600;
 }
 
 .card-validity {
-  display: flex;
-  gap: 16px;
+    display: flex;
+    gap: 20px;
 }
 
 .label {
-  font-size: 13px;
-  opacity: 0.9;
+    font-size: 1rem;
+    font-weight: 500;
+    align-items: center;
+    letter-spacing: 0;
 }
 
-.visa-logo {
-  height: 20px;
-}
-
-.user-badge {
-  position: absolute;
-  right: 24px;
-  top: 40%;
-  background-color: #FF8F00;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
+.cvv {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 @media (max-width: 767px) {
-  .card-component {
-    min-width: 280px;
-    height: 180px;
-    padding: 16px;
-  }
-  .fth-logo {
-    font-size: 16px;
-  }
-  .card-holder {
-    font-size: 18px;
-    margin: 12px 0;
-  }
-  .card-number {
-    font-size: 13px;
-    letter-spacing: 1.5px;
-    margin-bottom: 12px;
-  }
-  .label {
-    font-size: 12px;
-  }
-  .visa-logo {
-    height: 18px;
-  }
-  .user-badge {
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    font-size: 10px;
-  }
+    .card-component {
+        min-width: unset;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+    }
+    .card-header {
+        padding: 0.8rem 0;
+    }
+    .card-component:hover {
+        transform: none;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    }
+    .fth-logo {
+        font-size: 1.2rem;
+    }
+    .card-holder {
+        font-size: 1.5rem;
+    }
+    .card-number {
+        font-size: 1.2rem;
+        letter-spacing: px;
+        margin-bottom: 8px;
+    }
+    .dots-container{
+        width: 90%;
+    }
+    .dots-section {
+        margin-right: 1.4rem;
+    }
+    .card-validity {
+        gap: 10px;
+    }
+    .label {
+        font-size: 0.8rem;
+    }
+    .card-footer {
+        margin-top: 0;
+    }
+    .card-network .card-icon {
+        width: 3.5rem !important;
+        height: 3.5rem !important;
+    }
 }
 </style>

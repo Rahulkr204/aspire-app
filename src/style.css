@@ -8,6 +8,7 @@
   --dark-gray: #888888;
   --sidebar-bg: #0C365A;
   --error-color: #FF5F00;
+  --blue-shade: rgba(50, 91, 175, 0.08);
 }
 
 * {
@@ -30,11 +31,6 @@ body {
   box-shadow: 0 2px 8px rgba(50, 91, 175, 0.2);
 }
 
-.ant-btn-primary:hover {
-  background-color: #4270c5;
-  border-color: #4270c5;
-}
-
 .ant-tabs-tab {
   color: rgba(0, 0, 0, 0.65);
 }
@@ -48,9 +44,6 @@ body {
   background-color: var(--primary-color);
 }
 
-.ant-tabs-nav::before {
-  border-bottom: 1px solid var(--light-gray);
-}
 
 .ant-card {
   border-radius: 8px;
