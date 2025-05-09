@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, reactive } from 'vue'
+import { ref, computed, onMounted, watch, reactive, defineAsyncComponent, onUnmounted } from 'vue'
 import { useCardsStore } from '../stores/cardsStore'
 import { useTransactionsStore } from '../stores/transactionsStore'
 import { message } from 'ant-design-vue'
-import CardCarousel from '../components/CardCarousel.vue'
-import CardActions from '../components/CardActions.vue'
-import TransactionList from '../components/TransactionList.vue'
+// Lazy load components that are not needed immediately
+const CardCarousel = defineAsyncComponent(() => import('../components/CardCarousel.vue'))
+const CardActions = defineAsyncComponent(() => import('../components/CardActions.vue'))
+const TransactionList = defineAsyncComponent(() => import('../components/TransactionList.vue'))
 import { Card, Transaction, NewCardInput } from '../types'
 import { generateCardNumber, generateExpiryDate, generateCVV } from '../utils/index'
 
@@ -19,6 +20,8 @@ const showNewCardModal = ref<boolean>(false)
 const formRef = ref<any>(null)
 const showCardNumber = ref<boolean>(false)
 const nameInputRef = ref<any>(null)
+const isLoading = ref<boolean>(false)
+const formSubmitError = ref<string | null>(null)
 
 // Using a single reactive object for the new card form
 const newCard = reactive<NewCardInput>({
@@ -36,6 +39,22 @@ const updateMobileState = (): void => {
 onMounted(() => {
   updateMobileState()
   window.addEventListener('resize', updateMobileState)
+
+  const savedCards = localStorage.getItem('cards')
+  if (savedCards) {
+      try { cardsStore.cards = JSON.parse(savedCards) }
+      catch (e) { console.error('Error parsing saved cards:', e) }
+  }
+  const savedTransactions = localStorage.getItem('transactions')
+  if (savedTransactions) {
+      try { transactionsStore.transactions = JSON.parse(savedTransactions) }
+      catch (e) { console.error('Error parsing saved transactions:', e) }
+  }
+})
+
+// Cleanup event listeners to prevent memory leaks
+onUnmounted(() => {
+  window.removeEventListener('resize', updateMobileState)
 })
 
 const selectedCard = computed<Card | undefined>(() => {
@@ -102,18 +121,34 @@ const formatExpiryDate = (e: Event): void => {
 }
 
 const handleNewCardSubmit = (): void => {
+  formSubmitError.value = null;
   if (formRef.value) {
+    isLoading.value = true;
     formRef.value.validate().then(() => {
-      cardsStore.addCard(newCard)
-      message.success('New card added successfully')
-      closeNewCardModal()
+      try {
+        cardsStore.addCard(newCard);
+        message.success('New card added successfully');
+        closeNewCardModal();
+      } catch (error) {
+        console.error('Error adding card:', error);
+        formSubmitError.value = 'Failed to add card. Please try again.';
+        message.error('Failed to add card');
+      } finally {
+        isLoading.value = false;
+      }
     }).catch((error: any) => {
-      console.error('Validation failed:', error)
-    })
+      console.error('Validation failed:', error);
+      isLoading.value = false;
+    });
   } else {
-    cardsStore.addCard(newCard)
-    message.success('New card added successfully')
-    closeNewCardModal()
+    try {
+      cardsStore.addCard(newCard);
+      message.success('New card added successfully');
+      closeNewCardModal();
+    } catch (error) {
+      console.error('Error adding card:', error);
+      message.error('Failed to add card');
+    }
   }
 }
 
@@ -122,7 +157,7 @@ const toggleCardNumberVisibility = (): void => {
 }
 
 // Regular expressions for card input validation
-const cardNumberPattern = /^(?:4[0-9]{3}(?:\s[0-9]{4}){3}|5[1-5][0-9]{2}(?:\s[0-9]{4}){3})$/
+const cardNumberPattern = /^[0-9]{4}\s[0-9]{4}\s[0-9]{4}\s[0-9]{4}$/
 const expiryPattern = /^(0[1-9]|1[0-2])\/([0-9]{2})$/
 const cvvPattern = /^[0-9]{3}$/
 
@@ -141,19 +176,6 @@ watch(
   },
   { deep: true }
 )
-
-onMounted(() => {
-    const savedCards = localStorage.getItem('cards')
-    if (savedCards) {
-        try { cardsStore.cards = JSON.parse(savedCards) }
-        catch (e) { console.error('Error parsing saved cards:', e) }
-    }
-    const savedTransactions = localStorage.getItem('transactions')
-    if (savedTransactions) {
-        try { transactionsStore.transactions = JSON.parse(savedTransactions) }
-        catch (e) { console.error('Error parsing saved transactions:', e) }
-    }
-})
 </script>
 
 <template>
@@ -161,7 +183,11 @@ onMounted(() => {
         <div class="mobile-header" v-if="isMobileView">
             <div class="logo-container">
                 <img class="mobile-logo"
-                    src="https://cdn.prod.website-files.com/5ed5b60be1889f546024ada0/672b1e9d21d98dcfc6d10d5a_aspire-logo-p-500.png" />
+                    src="https://cdn.prod.website-files.com/5ed5b60be1889f546024ada0/672b1e9d21d98dcfc6d10d5a_aspire-logo-p-500.png"
+                    width="120"
+                    height="32"
+                    loading="lazy"
+                    alt="Aspire Logo" />
             </div>
             <div class="mobile-content">
                 <div class="mobile-balance-section">
@@ -171,8 +197,8 @@ onMounted(() => {
                         <span class="mobile-amount">{{ cardsStore.availableBalance.toLocaleString() }}</span>
                     </div>
                 </div>
-                <a-button type="text" class="mobile-new-card-btn" @click="openNewCardModal">
-                    <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff" />
+                <a-button type="text" class="mobile-new-card-btn" @click="openNewCardModal" aria-label="Add new card">
+                    <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff" aria-hidden="true" />
                     <span>New card</span>
                 </a-button>
             </div>
@@ -186,8 +212,8 @@ onMounted(() => {
                     <span class="amount">{{ cardsStore.availableBalance.toLocaleString() }}</span>
                 </div>
             </div>
-            <a-button type="primary" class="new-card-btn" @click="openNewCardModal">
-                <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff" />
+            <a-button type="primary" class="new-card-btn" @click="openNewCardModal" aria-label="Add new card">
+                <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff" aria-hidden="true" />
                 New card
             </a-button>
         </div>
@@ -198,18 +224,19 @@ onMounted(() => {
                     <div class="card-section">
                         <div class="leftSection">
                             <div class="card-visibility">
-                                <a-button type="text" @click="toggleCardNumberVisibility" class="show-number-btn">
+                                <a-button type="text" @click="toggleCardNumberVisibility" class="show-number-btn" aria-label="Toggle card number visibility">
                                     <div class="eye-icon">
-                                        <Icon :icon="showCardNumber ? 'ion:eye-off' : 'ion:eye'" width="20" height="20" style="color: var(--primary-color)" />
+                                        <Icon :icon="showCardNumber ? 'ion:eye-off' : 'ion:eye'" width="20" height="20" style="color: var(--primary-color)" aria-hidden="true" />
                                     </div>
                                     {{ showCardNumber ? 'Hide card number' : 'Show card number' }}
                                 </a-button>
                             </div>
-
-                            <CardCarousel :cards="cardsStore.cards" :selectedIndex="cardsStore.selectedCardIndex"
-                                :showCardNumber="showCardNumber"
-                                @update:selectedIndex="(index) => cardsStore.selectedCardIndex = index"
-                                class="card-carousel" />
+                            <div class="card-carousel-container">
+                                <CardCarousel :cards="cardsStore.cards" :selectedIndex="cardsStore.selectedCardIndex"
+                                    :showCardNumber="showCardNumber"
+                                    @update:selectedIndex="(index) => cardsStore.selectedCardIndex = index"
+                                    class="card-carousel" />
+                            </div>
 
                             <CardActions v-if="selectedCard" :cardId="selectedCard.id"
                                 :isFrozen="selectedCard.frozen" />
@@ -232,7 +259,8 @@ onMounted(() => {
             :style="isMobileView ? { top: '0', maxWidth: '100%', margin: '0', height: '100vh', paddingBottom: '0px' } : {}"
             :wrapClassName="isMobileView ? 'full-screen-modal' : ''" :footer="null">
             <a-form ref="formRef" class="card-form" :model="newCard">
-                <a-form-item name="name" label="Card Holder" class="custom-form-item" required>
+                <a-form-item name="name" label="Card Holder" class="custom-form-item" required
+                    :rules="[{ required: true, message: 'Please enter card holder name' }]">
                     <a-input v-model:value="newCard.name" ref="nameInputRef" placeholder="Enter card holder name" />
                 </a-form-item>
 
@@ -271,10 +299,11 @@ onMounted(() => {
                 </div>
 
                 <div class="modal-footer">
-                    <a-button type="default" class="cancel-btn" @click="closeNewCardModal">Cancel</a-button>
-                    <a-button type="primary" class="add-card-btn" @click="handleNewCardSubmit">Add Card</a-button>
+                    <a-button type="default" class="cancel-btn" @click="closeNewCardModal" :disabled="isLoading">Cancel</a-button>
+                    <a-button type="primary" class="add-card-btn" @click="handleNewCardSubmit" :loading="isLoading">Add Card</a-button>
                 </div>
             </a-form>
+            <div v-if="formSubmitError" class="error-message">{{ formSubmitError }}</div>
         </a-modal>
     </div>
 </template>
@@ -322,7 +351,7 @@ onMounted(() => {
 }
 .mobile-balance-label {
     font-size: 13px;
-    opacity: 0.7;
+    opacity: 0.9;
     margin-bottom: 2px;
 }
 .mobile-balance-amount {
@@ -363,7 +392,7 @@ onMounted(() => {
 .balance-label {
     font-size: 14px;
     color: #222;
-    font-weight: normal;
+    font-weight: 500;
     margin: 0;
 }
 .balance-amount {
@@ -440,6 +469,8 @@ onMounted(() => {
     width: 45%;
     padding-left: 1.5rem;
     margin-top: 3.2rem;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px;
 }
 .card-visibility {
     display: flex;
@@ -502,7 +533,7 @@ onMounted(() => {
 }
 
 .custom-tabs .ant-tabs-tab-btn {
-    color: #AAAAAA;
+    color: #777777;
     font-weight: 400;
     font-size: 14px;
     text-align: center;
@@ -657,6 +688,12 @@ onMounted(() => {
 
     .custom-tabs .ant-tabs-nav {
         padding-left: 1rem;
+        margin-bottom: 16px !important;
+    }
+
+    .custom-tabs .ant-tabs-tab {
+        padding: 8px 0;
+        margin-right: 16px;
     }
 
     .desktop-only {
@@ -684,6 +721,10 @@ onMounted(() => {
         padding: 0 1rem;
     }
 
+    .card-carousel-container {
+        padding: 0 0.5rem;
+    }
+
     .card-section {
         flex-direction: column;
         box-shadow: none;
@@ -703,21 +744,13 @@ onMounted(() => {
         margin: 0;
     }
 
-    .card-carousel-container {
-        padding: 0 1rem !important;
-    }
-
-    .show-number-btn {
-        padding-right: 0;
-    }
-
     .rightSection {
         background-color: white;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        padding: 0.4rem 0.8rem;
+        padding: 1rem;
         height: 100%;
         margin: 0;
-        border-radius: 0 !important;
+        /* border-radius: 12px 12px 0 0 !important; */
     }
 
     .transactions-section {
@@ -725,17 +758,13 @@ onMounted(() => {
         border-top-left-radius: 0;
         border-top-right-radius: 0;
         padding: 0 16px;
-        margin-top: 32px;
+        margin-top: 16px;
         position: static;
         z-index: auto;
     }
 
     .desktop-transactions-only {
         display: none !important;
-    }
-
-    .transactions-section:not(.mobile-scrollable-content) {
-        display: block;
     }
 
     .full-screen-modal .ant-modal {
@@ -757,5 +786,31 @@ onMounted(() => {
         flex-grow: 1;
         overflow-y: auto;
     }
+}
+
+/* Small phone optimization */
+@media (max-width: 375px) {
+    .mobile-balance-amount .mobile-amount {
+        font-size: 20px;
+    }
+
+    .mobile-header {
+        padding-bottom: 8px;
+    }
+
+    .custom-tabs .ant-tabs-tab:first-child {
+        min-width: 100px;
+    }
+
+    .custom-tabs .ant-tabs-tab:nth-child(2) {
+        min-width: 120px;
+    }
+}
+
+.error-message {
+    color: #ff4d4f;
+    font-size: 14px;
+    margin-top: 12px;
+    text-align: center;
 }
 </style>

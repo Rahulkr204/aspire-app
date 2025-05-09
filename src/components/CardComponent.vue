@@ -55,7 +55,7 @@ const getCardIconByType = (type: string): string => {
         <div class="card-holder">{{ card.name }}</div>
 
         <div class="card-number">
-            <div v-if="props.isVisible" class="dots-container">
+            <div v-if="props.isVisible" class="card-number-section">
                 {{ props.card.cardNumber }}
             </div>
             <div v-else class="dots-container">
@@ -131,6 +131,12 @@ const getCardIconByType = (type: string): string => {
     align-items: center;
     width: 85%;
     padding: 0.5rem 0;
+}
+.card-number-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
 }
 .dots-section {
     display: flex;
