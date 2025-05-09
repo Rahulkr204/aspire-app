@@ -203,7 +203,6 @@ const getCardIconByType = (type: string): string => {
 .card-number {
     width: auto;
     font-size: 1.6rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin-bottom: 16px;
 }
 
@@ -257,10 +256,11 @@ const getCardIconByType = (type: string): string => {
     }
     .card-number {
         font-size: 1.2rem;
+        width: auto;
         margin-bottom: 8px;
     }
     .card-number-container {
-        gap: 16px;
+        gap: 12px
     }
     .card-number-group {
         font-size: 1.2rem;
@@ -282,6 +282,10 @@ const getCardIconByType = (type: string): string => {
     .card-network .card-icon {
         width: 3.5rem !important;
         height: 3.5rem !important;
+    }
+    .card-number-group {
+        width: 100%;
+        gap: 8px;
     }
 }
 </style>
