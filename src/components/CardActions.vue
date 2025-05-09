@@ -119,10 +119,6 @@ const toggleFreeze = (): void => {
   height: 24px;
 }
 
-.action-icon svg {
-  stroke: #325BAF;
-}
-
 .gpay-icon {
   background-color: #fff;
 }

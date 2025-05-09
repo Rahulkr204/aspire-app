@@ -176,7 +176,7 @@ const scrollToActiveCard = (): void => {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #01D167;
+    background-color: var(--primary-color);
     opacity: 0.2;
     cursor: pointer;
     transition: all 0.3s ease;

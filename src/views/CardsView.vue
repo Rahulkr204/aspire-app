@@ -210,10 +210,7 @@ watch(
             <div class="logo-container">
                 <img class="mobile-logo"
                     src="https://cdn.prod.website-files.com/5ed5b60be1889f546024ada0/672b1e9d21d98dcfc6d10d5a_aspire-logo-p-500.png"
-                    width="120"
-                    height="32"
-                    loading="lazy"
-                    alt="Aspire Logo" />
+                    width="120" height="32" loading="lazy" alt="Aspire Logo" />
             </div>
             <div class="mobile-content">
                 <div class="mobile-balance-section">
@@ -224,7 +221,8 @@ watch(
                     </div>
                 </div>
                 <a-button type="text" class="mobile-new-card-btn" @click="openNewCardModal" aria-label="Add new card">
-                    <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff" aria-hidden="true" />
+                    <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff"
+                        aria-hidden="true" />
                     <span>New card</span>
                 </a-button>
             </div>
@@ -250,9 +248,11 @@ watch(
                     <div class="card-section">
                         <div class="leftSection">
                             <div class="card-visibility">
-                                <a-button type="text" @click="toggleCardNumberVisibility" class="show-number-btn" aria-label="Toggle card number visibility">
+                                <a-button type="text" @click="toggleCardNumberVisibility" class="show-number-btn"
+                                    aria-label="Toggle card number visibility">
                                     <div class="eye-icon">
-                                        <Icon :icon="showCardNumber ? 'ion:eye-off' : 'ion:eye'" width="20" height="20" style="color: var(--primary-color)" aria-hidden="true" />
+                                        <Icon :icon="showCardNumber ? 'ion:eye-off' : 'ion:eye'" width="20" height="20"
+                                            style="color: var(--primary-color)" aria-hidden="true" />
                                     </div>
                                     {{ showCardNumber ? 'Hide card number' : 'Show card number' }}
                                 </a-button>
@@ -282,7 +282,7 @@ watch(
 
         <a-modal destroyOnClose v-model:open="showNewCardModal" title="Add New Card" @cancel="closeNewCardModal"
             :width="isMobile ? '100%' : 520"
-            :style="isMobile ? { top: '0', maxWidth: '100%', margin: '0', height: '100vh', paddingBottom: '0px' } : {}"
+            :style="isMobile ? { maxWidth: '100%', margin: '0', height: '100%', top: '20%', paddingBottom: '0px' } : {}"
             :wrapClassName="isMobile ? 'full-screen-modal' : ''" :footer="null">
             <a-form ref="formRef" class="card-form" :model="newCard">
                 <a-form-item name="name" label="Card Holder" class="custom-form-item" required
@@ -296,11 +296,12 @@ watch(
                     ]">
                     <div class="card-number-wrapper">
                         <a-input v-model:value="newCard.cardNumber" placeholder="1234 XXXX XXXX XXXX"
-                            class="card-number-input" :maxlength="19" @input="formatCardNumber" />
-                        <div class="card-logo">
-                            <Icon icon="logos:mastercard" width="36" height="24" />
-                        </div>
+                            class="card-number-input" :maxlength="19" @input="formatCardNumber">
+                            <template #addonAfter>
+                                <Icon icon="logos:visa" width="36" height="24" />
+                            </template></a-input>
                     </div>
+
                 </a-form-item>
 
                 <div class="card-details-row">
@@ -325,8 +326,10 @@ watch(
                 </div>
 
                 <div class="modal-footer">
-                    <a-button type="default" class="cancel-btn" @click="closeNewCardModal" :disabled="isLoading">Cancel</a-button>
-                    <a-button type="primary" class="add-card-btn" @click="handleNewCardSubmit" :loading="isLoading">Add Card</a-button>
+                    <a-button type="default" class="cancel-btn" @click="closeNewCardModal"
+                        :disabled="isLoading">Cancel</a-button>
+                    <a-button type="primary" class="add-card-btn" @click="handleNewCardSubmit" :loading="isLoading">Add
+                        Card</a-button>
                 </div>
             </a-form>
             <div v-if="formSubmitError" class="error-message">{{ formSubmitError }}</div>

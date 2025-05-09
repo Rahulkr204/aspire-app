@@ -38,19 +38,21 @@ const visibleTransactions = computed((): Transaction[] => {
 
 <template>
     <div class="transaction-accordion-list">
-        <a-collapse v-model:activeKey="activeKey" accordion class="custom-collapse" :class="{ 'mobile-collapse': isMobile }">
+        <a-collapse v-model:activeKey="activeKey" accordion class="custom-collapse"
+            :class="{ 'mobile-collapse': isMobile }">
             <a-collapse-panel key="1" class="custom-panel">
                 <template #header>
                     <div class="panel-header">
                         <div class="panel-label">
                             <span class="panel-icon card-details-icon">
-                                <Icon icon="solar:card-2-broken" :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'" style="color: #325BAF" />
+                                <Icon icon="solar:card-2-broken" :width="isMobile ? '20' : '24'"
+                                    :height="isMobile ? '20' : '24'" style="color: #325BAF" />
                             </span>
                             <span>Card details</span>
                         </div>
                         <Icon
-                            :icon="activeKey && activeKey[0] === '1' ? `icons8:chevron-up-round` : `icons8:chevron-down-round`"
-                            :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'" style="color: #325BAF" />
+                            :icon="activeKey && activeKey[0] === '1' ? `ion:chevron-up-circle` : `ion:chevron-down-circle`"
+                            :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'" style="color: #D8E1F4" />
 
                     </div>
                 </template>
@@ -62,14 +64,14 @@ const visibleTransactions = computed((): Transaction[] => {
                     <div class="panel-header">
                         <div class="panel-label">
                             <span class="panel-icon recent-tx-icon">
-                                <Icon icon="humbleicons:arrows-right-left" :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'"
-                                    style="color: #325BAF" />
+                                <Icon icon="humbleicons:arrows-right-left" :width="isMobile ? '20' : '24'"
+                                    :height="isMobile ? '20' : '24'" style="color: #325BAF" />
                             </span>
                             <span>Recent transactions</span>
                         </div>
                         <Icon
-                            :icon="activeKey && activeKey[0] === '2' ? `icons8:chevron-up-round` : `icons8:chevron-down-round`"
-                            :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'" style="color: #325BAF" />
+                            :icon="activeKey && activeKey[0] === '2' ? `ion:chevron-up-circle` : `ion:chevron-down-circle`"
+                            :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'" style="color: #D8E1F4" />
                     </div>
                 </template>
                 <div v-if="transactions.length === 0" class="no-transactions">
@@ -85,32 +87,37 @@ const visibleTransactions = computed((): Transaction[] => {
                                     <div class="transaction-icon" :class="{ 'mobile-icon': isMobile }">
                                         <!-- Shopping icon -->
                                         <Icon v-if="transaction.category === 'shopping'" icon="ph:shopping-bag-bold"
-                                            class="transaction-category-icon" :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'"
-                                            style="color: #009DFF" />
+                                            class="transaction-category-icon" :width="isMobile ? '20' : '24'"
+                                            :height="isMobile ? '20' : '24'" style="color: #009DFF" />
                                         <!-- Flight icon -->
                                         <Icon v-else-if="transaction.category === 'travel'" icon="mdi:flight"
-                                            class="transaction-category-icon" :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'"
-                                            style="color: #00D6B6" />
+                                            class="transaction-category-icon" :width="isMobile ? '20' : '24'"
+                                            :height="isMobile ? '20' : '24'" style="color: #00D6B6" />
                                         <!-- Megaphone icon -->
                                         <Icon v-else-if="transaction.category === 'food'"
-                                            icon="mingcute:fork-spoon-line" class="transaction-category-icon" :width="isMobile ? '20' : '24'"
-                                            :height="isMobile ? '20' : '24'" style="color: #F25195" />
+                                            icon="mingcute:fork-spoon-line" class="transaction-category-icon"
+                                            :width="isMobile ? '20' : '24'" :height="isMobile ? '20' : '24'"
+                                            style="color: #F25195" />
                                     </div>
                                 </div>
 
                                 <div class="transaction-details">
                                     <div class="transaction-header">
-                                        <div class="merchant" :class="{ 'mobile-merchant': isMobile }">{{ transaction.merchant }}</div>
-                                        <div class="amount" :class="[getAmountClass(transaction.amount), { 'mobile-amount': isMobile }]">
+                                        <div class="merchant" :class="{ 'mobile-merchant': isMobile }">{{
+                                            transaction.merchant }}</div>
+                                        <div class="amount"
+                                            :class="[getAmountClass(transaction.amount), { 'mobile-amount': isMobile }]">
                                             {{ formatAmount(transaction.amount) }}
                                         </div>
                                     </div>
                                     <div class="transaction-meta">
-                                        <div class="date" :class="{ 'mobile-date': isMobile }">{{ transaction.date }}</div>
+                                        <div class="date" :class="{ 'mobile-date': isMobile }">{{ transaction.date }}
+                                        </div>
                                         <div class="badge-container">
                                             <span class="badge-icon">
-                                                <Icon icon="solar:card-linear" :width="isMobile ? '12' : '24'" :height="isMobile ? '12' : '24'"
-                                                    class="badge-svg-icon" style="color: white" />
+                                                <Icon icon="solar:card-linear" :width="isMobile ? '12' : '24'"
+                                                    :height="isMobile ? '12' : '24'" class="badge-svg-icon"
+                                                    style="color: white" />
                                             </span>
                                             <span v-if="transaction.type === 'credit'" class="badge-text">
                                                 Refund on debit card
@@ -126,7 +133,8 @@ const visibleTransactions = computed((): Transaction[] => {
                     </div>
                 </div>
 
-                <div class="view-all" v-if="transactions.length > 3" @click="toggleShowAllTransactions" :class="{ 'mobile-view-all': isMobile }">
+                <div class="view-all" v-if="transactions.length > 3" @click="toggleShowAllTransactions"
+                    :class="{ 'mobile-view-all': isMobile }">
                     <a>{{ showAllTransactions ? 'Show less' : 'View all card transactions' }}</a>
                 </div>
             </a-collapse-panel>
@@ -135,7 +143,6 @@ const visibleTransactions = computed((): Transaction[] => {
 </template>
 
 <style scoped>
-/* Transaction list animations */
 .transaction-list-enter-active,
 .transaction-list-leave-active {
   transition: all 0.4s ease;
@@ -197,7 +204,7 @@ const visibleTransactions = computed((): Transaction[] => {
 }
 
 .custom-panel {
-  background-color: var(--blue-shade);
+  background-color: #eff3fb;
   border-radius: 12px !important;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -246,7 +253,7 @@ const visibleTransactions = computed((): Transaction[] => {
 }
 
 .custom-panel :deep(.ant-collapse-content) {
-    border-top: 1px solid #F5F5F5;
+    border-top: 1px solid #F5F9FF;
     background-color: white;
     padding: 0 !important;
     transition: height 0.3s ease-in-out;
@@ -323,8 +330,13 @@ const visibleTransactions = computed((): Transaction[] => {
   font-size: 0.9rem;
 }
 
-.amount.positive { color: #01D167; }
-.amount.negative { color: #222222; font-weight: bold; } /* Black and bold for negative */
+.amount.positive {
+    color: var(--primary-color);
+}
+.amount.negative {
+    color: #222222;
+    font-weight: bold;
+}
 
 .transaction-meta {
   display: flex;
@@ -341,7 +353,6 @@ const visibleTransactions = computed((): Transaction[] => {
   font-size: 11px;
 }
 
-/* Badge styling */
 .badge-container {
     display: flex;
     align-items: center;
@@ -391,7 +402,7 @@ const visibleTransactions = computed((): Transaction[] => {
 }
 
 .view-all a {
-  color: #01D167;
+  color: var(--primary-color);
   font-weight: 500;
   font-size: 14px;
   transition: opacity 0.2s ease;
