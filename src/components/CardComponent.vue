@@ -23,6 +23,16 @@ const cardClassObject = computed(() => {
   }
 })
 
+// Parse the card number into four groups
+const cardParts = computed(() => {
+  const parts = props.card.cardNumber.split(' ');
+  return {
+    first: parts[0] || '',
+    second: parts[1] || '',
+    third: parts[2] || '',
+    fourth: parts[3] || ''
+  };
+});
 
 const handleClick = (): void => {
   emit('click')
@@ -55,23 +65,28 @@ const getCardIconByType = (type: string): string => {
         <div class="card-holder">{{ card.name }}</div>
 
         <div class="card-number">
-            <div v-if="props.isVisible" class="card-number-section">
-                {{ props.card.cardNumber }}
-            </div>
-            <div v-else class="dots-container">
-                <div class="dots-section">
-                    <span v-for="dots in Array(4).fill('')" class="dots">
-                    </span>
-                </div>
-                <div class="dots-section">
-                    <span v-for="dots in Array(4).fill('')" class="dots">
-                    </span>
-                </div>
-                <div class="dots-section">
-                    <span v-for="dots in Array(4).fill('')" class="dots">
-                    </span>
-                </div>
-                <span>{{ props.card.cardNumber.slice(-4) }}</span>
+            <div class="card-number-container">
+                <!-- Visible card number -->
+                <template v-if="props.isVisible">
+                    <div class="card-number-group">{{ cardParts.first }}</div>
+                    <div class="card-number-group">{{ cardParts.second }}</div>
+                    <div class="card-number-group">{{ cardParts.third }}</div>
+                    <div class="card-number-group">{{ cardParts.fourth }}</div>
+                </template>
+
+                <!-- Masked card number with dots -->
+                <template v-else>
+                    <div class="card-number-group">
+                        <span class="dots" v-for="i in 4" :key="'first-'+i"></span>
+                    </div>
+                    <div class="card-number-group">
+                        <span class="dots" v-for="i in 4" :key="'second-'+i"></span>
+                    </div>
+                    <div class="card-number-group">
+                        <span class="dots" v-for="i in 4" :key="'third-'+i"></span>
+                    </div>
+                    <div class="card-number-group">{{ cardParts.fourth }}</div>
+                </template>
             </div>
 
             <div class="card-validity">
@@ -125,35 +140,39 @@ const getCardIconByType = (type: string): string => {
     padding: 1.6rem 0;
 }
 
-.dots-container {
+.card-number-container {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 85%;
-    padding: 0.5rem 0;
-}
-.card-number-section {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     width: 100%;
+    margin-bottom: 16px;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 24px;
 }
-.dots-section {
+
+.card-number-group {
+    font-size: 1.5rem;
+    letter-spacing: 0.5rem;
     display: flex;
-    flex-direction: row;
+    align-items: center;
     justify-content: space-between;
-    width: 25%;
-    margin-right: 2rem;
+    gap: 4px;
+    font-family: monospace;
+    min-width: 60px;
+    width: 18%;
 }
+
 .dots {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background-color: #fff;
+    display: inline-block;
+    margin: 0 2px;
 }
+
 .aspire-logo {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .fth-logo {
@@ -184,8 +203,8 @@ const getCardIconByType = (type: string): string => {
 .card-number {
     width: auto;
     font-size: 1.6rem;
-    letter-spacing: 3.4px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-bottom: 16px;
 }
 
 .card-footer {
@@ -199,6 +218,7 @@ const getCardIconByType = (type: string): string => {
 .card-validity {
     display: flex;
     gap: 20px;
+    margin-top: 4px;
 }
 
 .label {
@@ -220,6 +240,7 @@ const getCardIconByType = (type: string): string => {
         width: 100%;
         height: 100%;
         border-radius: 10px;
+        padding: 0 1.5rem;
     }
     .card-header {
         padding: 0.8rem 0;
@@ -236,14 +257,18 @@ const getCardIconByType = (type: string): string => {
     }
     .card-number {
         font-size: 1.2rem;
-        letter-spacing: px;
         margin-bottom: 8px;
     }
-    .dots-container{
-        width: 90%;
+    .card-number-container {
+        gap: 16px;
     }
-    .dots-section {
-        margin-right: 1.4rem;
+    .card-number-group {
+        font-size: 1.2rem;
+        min-width: 48px;
+    }
+    .dots {
+        width: 6px;
+        height: 6px;
     }
     .card-validity {
         gap: 10px;

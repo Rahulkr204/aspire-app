@@ -3,10 +3,30 @@ import { ref, computed, onMounted, watch, reactive, defineAsyncComponent, onUnmo
 import { useCardsStore } from '../stores/cardsStore'
 import { useTransactionsStore } from '../stores/transactionsStore'
 import { message } from 'ant-design-vue'
-// Lazy load components that are not needed immediately
-const CardCarousel = defineAsyncComponent(() => import('../components/CardCarousel.vue'))
-const CardActions = defineAsyncComponent(() => import('../components/CardActions.vue'))
-const TransactionList = defineAsyncComponent(() => import('../components/TransactionList.vue'))
+
+
+// Lazy load components that are not needed immediately with loading states
+const CardCarousel = defineAsyncComponent({
+  loader: () => import('../components/CardCarousel.vue'),
+  loadingComponent: {
+    template: '<div class="component-loading card-carousel-loading"></div>'
+  },
+  delay: 200, // 200ms delay before showing loading state
+})
+const CardActions = defineAsyncComponent({
+  loader: () => import('../components/CardActions.vue'),
+  loadingComponent: {
+    template: '<div class="component-loading card-actions-loading"></div>'
+  },
+  delay: 200,
+})
+const TransactionList = defineAsyncComponent({
+  loader: () => import('../components/TransactionList.vue'),
+  loadingComponent: {
+    template: '<div class="component-loading transactions-loading"></div>'
+  },
+  delay: 200,
+})
 import { Card, Transaction, NewCardInput } from '../types'
 import { generateCardNumber, generateExpiryDate, generateCVV } from '../utils/index'
 
@@ -381,7 +401,6 @@ watch(
     margin-left: 8px;
 }
 
-/* Desktop balance section */
 .balance-section.desktop-only {
   display: flex;
   flex-direction: row;
@@ -430,7 +449,6 @@ watch(
     font-size: 16px;
 }
 
-/* Tabs container and custom tab styles */
 .tabs-container {
   margin-bottom: 24px;
   flex: 1;
@@ -438,7 +456,6 @@ watch(
   flex-direction: column;
 }
 
-/* Card section */
 .card-section {
     display: flex;
     flex-direction: row;
@@ -456,8 +473,10 @@ watch(
 .leftSection {
     display: flex;
     flex-direction: column;
-    width: 55%;
+    width: calc(55% - 0.75rem);
     padding: 0;
+    height: 100%;
+    min-height: 400px;
 }
 .custom-tabs .ant-tabs-nav {
     margin-bottom: 24px !important;
@@ -466,11 +485,11 @@ watch(
 .rightSection {
     display: flex;
     flex-direction: column;
-    width: 45%;
+    width: calc(45% - 0.75rem);
     padding-left: 1.5rem;
-    margin-top: 3.2rem;
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 500px;
+    margin-top: 0;
+    height: 100%;
+    min-height: 400px;
 }
 .card-visibility {
     display: flex;
@@ -498,7 +517,6 @@ watch(
     margin-bottom: 12px;
 }
 
-/* Transactions section */
 .transactions-section {
   margin-top: 32px;
 }
@@ -673,7 +691,6 @@ watch(
     background-color: #0C365A;
 }
 
-/* Mobile responsiveness */
 @media (max-width: 768px) {
     .cards-view {
         padding: 0;
@@ -733,24 +750,42 @@ watch(
         background-color: transparent;
         border-radius: 12px;
         overflow-y: hidden;
+        min-height: 650px;
+        height: auto;
+        contain: content;
     }
 
     .leftSection,
     .rightSection {
         width: 100%;
+        min-height: auto;
+        height: auto;
     }
 
     .leftSection {
         margin: 0;
+        padding: 0;
+        min-height: 350px;
     }
 
     .rightSection {
         background-color: white;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         padding: 1rem;
-        height: 100%;
         margin: 0;
-        /* border-radius: 12px 12px 0 0 !important; */
+        min-height: 300px;
+    }
+
+    .card-carousel-container {
+        min-height: 200px;
+    }
+
+    .card-carousel-loading {
+        height: 180px;
+    }
+
+    .transactions-loading {
+        height: 250px;
     }
 
     .transactions-section {
@@ -788,7 +823,6 @@ watch(
     }
 }
 
-/* Small phone optimization */
 @media (max-width: 375px) {
     .mobile-balance-amount .mobile-amount {
         font-size: 20px;
@@ -812,5 +846,12 @@ watch(
     font-size: 14px;
     margin-top: 12px;
     text-align: center;
+}
+
+.card-carousel-container {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    contain: layout style;
 }
 </style>

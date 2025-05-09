@@ -5,11 +5,44 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgICAgICAgICAgICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTI1IDUwQzM4LjgwNzEgNTAgNTAgMzguODA3MSA1MCAyNUM1MCAxMS4xOTI5IDM4LjgwNzEgMCAyNSAwQzExLjE5MjkgMCAwIDExLjE5MjkgMCAyNUMwIDM4LjgwNzEgMTEuMTkyOSA1MCAyNSA1MFoiIGZpbGw9IiMwMUQxNjciIC8+CiAgICAgICAgICAgICAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNy4yOTU5IDIxLjQzMTVMMjQuOTk5OSAzMS4yMzcxTDMyLjcwMzggMjEuNDMxNUgzNi4xMjVMMjUgMzYuMjVMMTMuODc1IDIxLjQzMTVIMTcuMjk1OVoiIGZpbGw9IndoaXRlIiAvPgogICAgICAgICAgICAgIDxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMjUgMTMuNzVMMzYuMTI1IDI4LjU2ODVIMzIuNzAzOEwyNSAxOC43NjI5TDE3LjI5NTkgMjguNTY4NUgxMy44NzVMMjUgMTMuNzVaIiBmaWxsPSJ3aGl0ZSIgLz4KICAgICAgICAgICAgPC9zdmc+" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aspire App</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.prod.website-files.com" crossorigin>
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://api.iconify.design" crossorigin>
+
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Preload critical logo image -->
+    <link rel="preload" href="https://cdn.prod.website-files.com/5ed5b60be1889f546024ada0/672b1e9d21d98dcfc6d10d5a_aspire-logo-p-500.png" as="image" fetchpriority="high">
+
+    <!-- Meta description for SEO -->
     <meta name="description" content="Aspire App - Manage your debit cards and transactions">
+
+    <!-- Set theme color for browser UI -->
+    <meta name="theme-color" content="#01D167">
+
+    <!-- Performance optimizations -->
+    <style>
+      :root {
+        --primary-color: #01D167;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Open Sans', sans-serif;
+        background-color: #f8f8f8;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      #app {
+        width: 100%;
+        height: 100vh;
+      }
+      .cards-view {
+        min-height: 100vh;
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>
