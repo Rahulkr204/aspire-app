@@ -18,6 +18,7 @@ const activeTabKey = ref<string>('1')
 const showNewCardModal = ref<boolean>(false)
 const formRef = ref<any>(null)
 const showCardNumber = ref<boolean>(false)
+const nameInputRef = ref<any>(null)
 
 // Using a single reactive object for the new card form
 const newCard = reactive<NewCardInput>({
@@ -26,7 +27,6 @@ const newCard = reactive<NewCardInput>({
   expiryDate: generateExpiryDate(),
   cvv: generateCVV()
 })
-
 const isMobileView = ref<boolean>(window.innerWidth < 768)
 
 const updateMobileState = (): void => {
@@ -52,18 +52,26 @@ const handleTabChange = (key: string): void => {
 }
 
 const openNewCardModal = (): void => {
+  // Regenerate card values each time modal is opened
+  Object.assign(newCard, {
+    name: '',
+    cardNumber: generateCardNumber(),
+    expiryDate: generateExpiryDate(),
+    cvv: generateCVV()
+  })
   showNewCardModal.value = true
+  // Focus on the name input field after the modal is opened
+  setTimeout(() => {
+    if (nameInputRef.value) {
+      nameInputRef.value.focus()
+    }
+  }, 100)
 }
 
 const closeNewCardModal = (): void => {
   showNewCardModal.value = false
-  // Reset the form fields
-  Object.assign(newCard, {
-    name: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: ''
-  })
+  // Reset only the name field
+  newCard.name = ''
 }
 
 const formatCardNumber = (e: Event): void => {
@@ -135,33 +143,39 @@ watch(
 )
 
 onMounted(() => {
-  const savedCards = localStorage.getItem('cards')
-  if (savedCards) {
-    try { cardsStore.cards = JSON.parse(savedCards) }
-    catch (e) { console.error('Error parsing saved cards:', e) }
-  }
-  const savedTransactions = localStorage.getItem('transactions')
-  if (savedTransactions) {
-    try { transactionsStore.transactions = JSON.parse(savedTransactions) }
-    catch (e) { console.error('Error parsing saved transactions:', e) }
-  }
+    const savedCards = localStorage.getItem('cards')
+    if (savedCards) {
+        try { cardsStore.cards = JSON.parse(savedCards) }
+        catch (e) { console.error('Error parsing saved cards:', e) }
+    }
+    const savedTransactions = localStorage.getItem('transactions')
+    if (savedTransactions) {
+        try { transactionsStore.transactions = JSON.parse(savedTransactions) }
+        catch (e) { console.error('Error parsing saved transactions:', e) }
+    }
 })
 </script>
 
 <template>
     <div class="cards-view">
-        <div class="mobile-header">
-            <div class="mobile-balance-section">
-                <h3 class="mobile-balance-label">Account balance</h3>
-                <div class="mobile-balance-amount">
-                    <span class="mobile-currency">S$</span>
-                    <span class="mobile-amount">{{ cardsStore.availableBalance.toLocaleString() }}</span>
-                </div>
+        <div class="mobile-header" v-if="isMobileView">
+            <div class="logo-container">
+                <img class="mobile-logo"
+                    src="https://cdn.prod.website-files.com/5ed5b60be1889f546024ada0/672b1e9d21d98dcfc6d10d5a_aspire-logo-p-500.png" />
             </div>
-            <a-button type="text" class="mobile-new-card-btn" @click="openNewCardModal">
-                <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff" />
-                <span>New card</span>
-            </a-button>
+            <div class="mobile-content">
+                <div class="mobile-balance-section">
+                    <h3 class="mobile-balance-label">Account balance</h3>
+                    <div class="mobile-balance-amount">
+                        <span class="mobile-currency">S$</span>
+                        <span class="mobile-amount">{{ cardsStore.availableBalance.toLocaleString() }}</span>
+                    </div>
+                </div>
+                <a-button type="text" class="mobile-new-card-btn" @click="openNewCardModal">
+                    <Icon icon="icon-park-solid:add-one" width="20" height="20" style="color: #fff" />
+                    <span>New card</span>
+                </a-button>
+            </div>
         </div>
 
         <div class="balance-section desktop-only">
@@ -186,7 +200,7 @@ onMounted(() => {
                             <div class="card-visibility">
                                 <a-button type="text" @click="toggleCardNumberVisibility" class="show-number-btn">
                                     <div class="eye-icon">
-                                        <Icon icon="ion:eye" width="20" height="20" style="color: #01D167" />
+                                        <Icon :icon="showCardNumber ? 'ion:eye-off' : 'ion:eye'" width="20" height="20" style="color: var(--primary-color)" />
                                     </div>
                                     {{ showCardNumber ? 'Hide card number' : 'Show card number' }}
                                 </a-button>
@@ -213,13 +227,13 @@ onMounted(() => {
             </a-tabs>
         </div>
 
-        <a-modal v-model:open="showNewCardModal" title="Add New Card" @cancel="closeNewCardModal"
+        <a-modal destroyOnClose v-model:open="showNewCardModal" title="Add New Card" @cancel="closeNewCardModal"
             :width="isMobileView ? '100%' : 520"
             :style="isMobileView ? { top: '0', maxWidth: '100%', margin: '0', height: '100vh', paddingBottom: '0px' } : {}"
             :wrapClassName="isMobileView ? 'full-screen-modal' : ''" :footer="null">
             <a-form ref="formRef" class="card-form" :model="newCard">
                 <a-form-item name="name" label="Card Holder" class="custom-form-item" required>
-                    <a-input v-model:value="newCard.name" placeholder="Enter card holder name" />
+                    <a-input v-model:value="newCard.name" ref="nameInputRef" placeholder="Enter card holder name" />
                 </a-form-item>
 
                 <a-form-item name="cardNumber" label="Card number" class="custom-form-item" required :rules="[
@@ -267,22 +281,66 @@ onMounted(() => {
 
 <style>
 .cards-view {
-  max-width: 1200px;
-  margin: 0 auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
-
-/* Mobile Header specific styles */
 .mobile-header {
-  display: none;
-  background-color: #0C365A;
-  padding: 16px;
-  color: white;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    background-color: #0C365A;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-.mobile-balance-section { margin-bottom: 12px; }
-.mobile-balance-label { font-size: 13px; opacity: 0.7; margin-bottom: 2px; }
-.mobile-balance-amount { display: flex; align-items: baseline; }
-.mobile-currency { font-size: 13px; font-weight: bold; background-color: #01D167; padding: 3px 5px; border-radius: 3px; margin-right: 6px; }
-.mobile-amount { font-size: 22px; font-weight: bold; }
+.logo-container {
+    width: 100%;
+    text-align: center;
+    padding: 12px 0;
+    background-color: #0C365A;
+}
+.mobile-logo {
+    height: 32px;
+}
+.mobile-content {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px 12px;
+}
+.mobile-balance-section {
+    margin-bottom: 0;
+}
+.mobile-balance-label {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-bottom: 2px;
+}
+.mobile-balance-amount {
+    display: flex;
+    align-items: baseline;
+}
+.mobile-currency {
+    font-size: 13px;
+    font-weight: bold;
+    background-color: var(--primary-color);
+    padding: 3px 5px;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+.mobile-amount {
+    font-size: 22px;
+    font-weight: bold;
+}
 .mobile-new-card-btn {
     display: flex;
     align-items: center;
@@ -302,22 +360,30 @@ onMounted(() => {
   justify-content: space-between;
   margin-bottom: 32px;
 }
-.balance-label { font-size: 14px; color: #222; font-weight: normal; margin: 0; }
+.balance-label {
+    font-size: 14px;
+    color: #222;
+    font-weight: normal;
+    margin: 0;
+}
 .balance-amount {
     display: flex;
     align-items: center;
     margin-top: 0.8rem;
 }
 .currency {
-    font-size: 14px;
+    font-size: 1rem;
     font-weight: bold;
     color: white;
-    background-color: #01D167;
+    background-color: var(--primary-color);
     padding: 4px 6px;
     border-radius: 4px;
     margin-right: 8px;
 }
-.amount { font-size: 24px; font-weight: bold; }
+.amount {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
 .new-card-btn {
     background-color: #325BAF;
     border-color: #325BAF;
@@ -338,6 +404,9 @@ onMounted(() => {
 /* Tabs container and custom tab styles */
 .tabs-container {
   margin-bottom: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Card section */
@@ -351,11 +420,18 @@ onMounted(() => {
     border: none;
     border-radius: 0;
     background-color: white;
+    margin: 0;
+    min-height: 0;
+    flex: 1;
 }
 .leftSection {
     display: flex;
     flex-direction: column;
     width: 55%;
+    padding: 0;
+}
+.custom-tabs .ant-tabs-nav {
+    margin-bottom: 24px !important;
     padding: 0;
 }
 .rightSection {
@@ -373,7 +449,7 @@ onMounted(() => {
 .show-number-btn {
     display: flex;
     align-items: center;
-    color: #01D167;
+    color: var(--primary-color);
     padding: 0;
     font-size: 13px;
 }
@@ -397,250 +473,136 @@ onMounted(() => {
 }
 .company-cards-placeholder { padding: 32px; text-align: center; color: #888; }
 
-/* Mobile responsiveness */
-@media (max-width: 767px) {
-  .cards-view {
-    padding: 0;
-  }
-  .desktop-only {
-    display: none !important;
-  }
-  .mobile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: static;
-    background-color: #0C365A;
-    padding: 16px;
-    color: white;
-    z-index: auto;
-  }
-  .mobile-balance-section { margin-bottom: 0; }
-  .mobile-new-card-btn { position: static; }
-
-  .tabs-container {
-    background-color: #0C365A;
-  }
-
-  .card-section {
-    flex-direction: column;
-    box-shadow: none;
-    border: none;
-    padding: 0;
-    background-color: transparent;
-    border-radius: 12px;
-    overflow-y: hidden;
-  }
-  .leftSection, .rightSection {
-    width: 100%;
-    border-left: none;
-  }
-  .leftSection {
-    padding: 0 1rem;
-    margin-bottom: 16px;
-  }
-  .rightSection {
-    overflow-y: auto;
-    z-index: 10;
-  }
-  .card-carousel {
-    padding-left: 0;
-    padding-right: 0;
-    margin-bottom: 16px;
-  }
-  .show-number-btn {
-     padding-right: 0;
-  }
-
-  .rightSection {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 0;
-  }
-
-  .transactions-section {
-    background-color: inherit;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    padding: 0 16px;
-    margin-top: 32px;
-    position: static;
-    z-index: auto;
-  }
-  .desktop-transactions-only {
-    display: none !important;
-  }
-  .transactions-section:not(.mobile-scrollable-content) {
-    display: block;
-  }
-
-  .full-screen-modal .ant-modal { max-width: 100%; top: 0; padding-bottom: 0; margin: 0; }
-  .full-screen-modal .ant-modal-content {
-    display: flex;
-    flex-direction: column;
-    top: 20%;
-    position: absolute;
-    border-radius: 0;
-    }
-  .full-screen-modal .ant-modal-body { flex-grow: 1; overflow-y: auto; }
-}
-
 .custom-tabs {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .custom-tabs .ant-tabs-nav {
-  margin-bottom: 24px !important;
-  padding: 0 1rem;
+    margin-bottom: 24px !important;
 }
 
 .custom-tabs .ant-tabs-tab {
-  padding: 8px 0 12px;
-  font-size: 14px;
-  margin-right: 32px;
-  position: relative;
+    padding: 8px 0 12px;
+    font-size: 14px;
+    margin-right: 32px;
+    position: relative;
 }
 
 .custom-tabs .ant-tabs-tab + .ant-tabs-tab {
-  margin-left: 0;
+    margin-left: 0;
 }
 
-.custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #0379FF !important;
-  font-weight: 600;
-  position: relative;
+.custom-tabs .ant-tabs-ink-bar {
+    color: #000000 !important;
+    background-color: #24CEFD !important;
+    height: 3px !important;
 }
 
 .custom-tabs .ant-tabs-tab-btn {
-  color: #AAAAAA;
-  font-weight: 400;
-  font-size: 14px;
-  text-align: center;
+    color: #AAAAAA;
+    font-weight: 400;
+    font-size: 14px;
+    text-align: center;
 }
 
 .custom-tabs .ant-tabs-tab:hover .ant-tabs-tab-btn {
-  color: #0379FF;
+    color: #0379FF;
 }
 
-/* Fix the tab width to make the underline match the design */
 .custom-tabs .ant-tabs-tab:first-child {
-  min-width: 120px;
+    min-width: 120px;
 }
 
 .custom-tabs .ant-tabs-tab:nth-child(2) {
-  min-width: 140px;
-  opacity: 0.8;
+    min-width: 140px;
+    opacity: 0.8;
 }
 
-/* Override tab bar bottom divider */
-.custom-tabs .ant-tabs-nav::before {
-  border-bottom: none !important;
-}
-
-/* Ensure tab panes have borders */
 .custom-tabs .ant-tabs-content-holder {
-  border: 1px solid #F0F0F0;
-  border-radius: 12px;
-  padding: 0;
-  margin-top: 8px;
+    border: 1px solid #F0F0F0;
+    border-radius: 12px;
+    padding: 0;
+    margin-top: 8px;
+    overflow: auto;
+    flex: 1;
 }
 
 .custom-tabs .ant-tabs-content {
-  height: 100%;
-  border-radius: 12px;
-  overflow: hidden;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-.card-section {
-  border-radius: 0;
-  border: none;
-  margin: 0;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 767px) {
-  .custom-tabs .ant-tabs-content-holder {
-    border: none;
-    margin-top: 0;
-    box-shadow: none;
-  }
-}
-
-/* Card form styles */
-.card-form.card-form {
-  background-color: #fff;
-  border-radius: 10px;
-  padding: 1rem 0;
+.card-form {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 1rem 0;
 }
 
 .custom-form-item {
-  margin-bottom: 20px;
+    margin-bottom: 1.2rem;
 }
 
 .custom-label {
-  color: #222;
-  font-size: 14px;
-  font-weight: 400;
+    color: #222;
+    font-size: 1rem;
+    font-weight: 400;
 }
 
 .card-details-row {
-  display: flex;
-  gap: 16px;
+    display: flex;
+    gap: 16px;
 }
 
 .expiry-form-item, .cvv-form-item {
-  flex: 1;
+    flex: 1;
 }
 
 .card-number-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .card-number-input {
-  font-family: monospace;
-  letter-spacing: 1px;
-  padding-right: 50px;
+    font-family: monospace;
+    letter-spacing: 1px;
 }
 
 .card-logo {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .cvv-input-container {
-  display: flex;
-  align-items: center;
-  position: relative;
+    display: flex;
+    align-items: center;
+    position: relative;
 }
 
 .cvv-form-item :deep(.ant-input) {
-  padding-right: 30px;
+    padding-right: 30px;
 }
 
 
 .card-form :deep(.ant-input) {
-  background-color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  color: #000000;
-  height: 46px;
-  padding: 10px 14px;
-  box-shadow: none;
-  font-size: 14px;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    color: #000000;
+    height: 46px;
+    padding: 10px 14px;
+    box-shadow: none;
+    font-size: 14px;
 }
 
 .modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cancel-btn {
@@ -650,34 +612,150 @@ onMounted(() => {
 }
 
 .cancel-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid #01D167 !important;
-  color: #01D167 !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid #01D167 !important;
+    color: var(--primary-color) !important;
 }
 
 .add-card-btn {
-  background-color: #01D167 !important;
-  font-weight: 500;
-  height: 40px;
+    background-color: #01D167 !important;
+    font-weight: 500;
+    height: 40px;
 }
 
 .add-card-btn:hover {
-  background-color: #04be5e !important;
-border-color: #01D167 !important;
+    background-color: #04be5e !important;
+    border-color: #01D167 !important;
 }
 
-/* Full screen modal for mobile */
 .full-screen-modal :deep(.ant-modal) {
-  max-width: 100%;
-  top: 0;
-  padding-bottom: 0;
-  margin: 0;
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+    margin: 0;
 }
 
 .full-screen-modal :deep(.ant-modal-content) {
-  display: flex;
-  flex-direction: column;
-  border-radius: 0;
-  background-color: #0C365A;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    background-color: #0C365A;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .cards-view {
+        padding: 0;
+        padding-top: 7rem;
+    }
+
+    .custom-tabs .ant-tabs-content-holder {
+        border: none;
+        margin-top: 0;
+        box-shadow: none;
+    }
+
+    .custom-tabs .ant-tabs-nav {
+        padding-left: 1rem;
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+
+    .mobile-header {
+        display: flex;
+        z-index: 1000;
+    }
+
+    .mobile-balance-section {
+        margin-bottom: 0;
+    }
+
+    .mobile-new-card-btn {
+        position: static;
+    }
+
+    .tabs-container {
+        background-color: #0C365A;
+    }
+
+    .card-visibility {
+        padding: 0 1rem;
+    }
+
+    .card-section {
+        flex-direction: column;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        background-color: transparent;
+        border-radius: 12px;
+        overflow-y: hidden;
+    }
+
+    .leftSection,
+    .rightSection {
+        width: 100%;
+    }
+
+    .leftSection {
+        margin: 0;
+    }
+
+    .card-carousel-container {
+        padding: 0 1rem !important;
+    }
+
+    .show-number-btn {
+        padding-right: 0;
+    }
+
+    .rightSection {
+        background-color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 0.4rem 0.8rem;
+        height: 100%;
+        margin: 0;
+        border-radius: 0 !important;
+    }
+
+    .transactions-section {
+        background-color: inherit;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        padding: 0 16px;
+        margin-top: 32px;
+        position: static;
+        z-index: auto;
+    }
+
+    .desktop-transactions-only {
+        display: none !important;
+    }
+
+    .transactions-section:not(.mobile-scrollable-content) {
+        display: block;
+    }
+
+    .full-screen-modal .ant-modal {
+        max-width: 100%;
+        top: 0;
+        padding-bottom: 0;
+        margin: 0;
+    }
+
+    .full-screen-modal .ant-modal-content {
+        display: flex;
+        flex-direction: column;
+        top: 20%;
+        position: absolute;
+        border-radius: 0;
+    }
+
+    .full-screen-modal .ant-modal-body {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
 }
 </style>

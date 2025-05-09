@@ -62,7 +62,8 @@ const toggleFreeze = (): void => {
   justify-content: space-around;
   background-color: #EDF3FF;
   border-radius: 12px;
-  padding: 12px 4px;
+  padding: 0.8rem 1rem;
+  width: 100%;
 }
 
 .action-button {
@@ -73,6 +74,7 @@ const toggleFreeze = (): void => {
   padding: 0.5rem 1rem;
   border-radius: 8px;
   transition: background-color 0.2s;
+  width: 20%;
 }
 
 .action-button:hover {
@@ -107,17 +109,20 @@ const toggleFreeze = (): void => {
   line-height: 1.2;
 }
 
-@media (max-width: 360px) {
-  .action-text {
-    font-size: 10px;
-  }
-  .action-icon {
-    width: 24px;
-    height: 24px;
-  }
-  .action-icon svg {
-    width: 18px;
-    height: 18px;
-  }
+@media (max-width: 768px) {
+    .card-actions {
+        border-radius: 12px 12px 0 0;
+    }
+    .action-text {
+        font-size: 10px;
+    }
+    .action-icon {
+        width: 24px;
+        height: 24px;
+    }
+    .action-icon svg {
+        width: 18px;
+        height: 18px;
+    }
 }
 </style>

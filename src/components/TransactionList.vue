@@ -238,12 +238,10 @@ const visibleTransactions = computed((): Transaction[] => {
     height: 24px;
 }
 
-/* Hide default arrow */
 .custom-panel :deep(.ant-collapse-arrow) {
     display: none !important;
 }
 
-/* Panel Content Styling */
 .custom-panel :deep(.ant-collapse-content) {
     border-top: 1px solid #F5F5F5;
     background-color: white;
@@ -263,7 +261,6 @@ const visibleTransactions = computed((): Transaction[] => {
     margin: 0;
 }
 
-/* Transaction List specific styles (mostly inherited) */
 .no-transactions {
   text-align: center;
   padding: 24px;
@@ -368,9 +365,10 @@ const visibleTransactions = computed((): Transaction[] => {
 }
 
 /* Mobile responsiveness improvements */
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .custom-collapse {
     gap: 16px;
+    padding-bottom: 3rem;
   }
 
   .transaction-item {

@@ -46,6 +46,7 @@ const getCardIconByType = (type: string): string => {
     <div :class="cardClassObject" @click="handleClick">
         <div class="card-header">
             <div class="aspire-logo">
+                <img src="../assets/logo.svg" alt="Aspire Logo" width="24" height="24">
                 <span class="fth-logo mobile-logo">aspire</span>
             </div>
             <div v-if="props.card.frozen" class="frozen-badge">FROZEN</div>
@@ -54,7 +55,7 @@ const getCardIconByType = (type: string): string => {
         <div class="card-holder">{{ card.name }}</div>
 
         <div class="card-number">
-            <div v-if="props.isVisible">
+            <div v-if="props.isVisible" class="dots-container">
                 {{ props.card.cardNumber }}
             </div>
             <div v-else class="dots-container">
@@ -79,7 +80,8 @@ const getCardIconByType = (type: string): string => {
                     CVV:
                     <span v-if="props.isVisible">{{ card.cvv }}</span>
                     <div v-else style="display: flex; align-items: center;">
-                        <Icon v-for="asterisk in Array(3).fill('')" icon="ix:asterisk" width="20" height="20" style="color: #fff" />
+                        <Icon v-for="asterisk in Array(3).fill('')" icon="ix:asterisk" width="20" height="20"
+                            style="color: #fff" />
                     </div>
                 </div>
             </div>
@@ -87,7 +89,8 @@ const getCardIconByType = (type: string): string => {
 
         <div class="card-footer">
             <div class="card-network">
-                <Icon :icon="getCardIconByType(card.type)" class="card-icon" width="5rem" height="5rem" style="color: #fff" />
+                <Icon :icon="getCardIconByType(card.type)" class="card-icon" width="5rem" height="5rem"
+                    style="color: #fff" />
             </div>
         </div>
     </div>
@@ -95,7 +98,7 @@ const getCardIconByType = (type: string): string => {
 
 <style scoped>
 .card-component {
-    background-color: #01D167;
+    background-color: var(--primary-color);
     border-radius: 12px;
     color: white;
     width: 100%;
@@ -145,7 +148,6 @@ const getCardIconByType = (type: string): string => {
 .aspire-logo {
     display: flex;
     align-items: center;
-    flex-direction: row-reverse;
 }
 
 .fth-logo {
@@ -155,6 +157,7 @@ const getCardIconByType = (type: string): string => {
     text-transform: lowercase;
     position: relative;
     font-size: 1.4rem;
+    padding-left: 8px;
 }
 
 .frozen-badge {
@@ -205,7 +208,7 @@ const getCardIconByType = (type: string): string => {
     align-items: center;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
     .card-component {
         min-width: unset;
         width: 100%;

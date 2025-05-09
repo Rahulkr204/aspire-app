@@ -54,7 +54,7 @@ const menuItems = [
             <nav class="sidebar-nav">
                 <router-link v-for="item in menuItems" :key="item.path" :to="item.path" class="nav-item"
                     :class="{ active: currentRoute === item.path }">
-                    <Icon :icon="item.icon" width="20" height="20" style="color: #fff; margin-right: 12px;" />
+                    <Icon :icon="item.icon" width="20" height="20" :style="currentRoute === item.path ? { color: '#01D167' } : { color: '#fff' }" />
                     <span class="nav-text">{{ item.name === 'Profile' ? 'Settings' : item.name }}</span>
                 </router-link>
             </nav>
@@ -75,24 +75,9 @@ const menuItems = [
 </template>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Open Sans', 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #222;
-  background-color: #f5f5f5;
-  overflow-x: hidden;
-}
-
 .app-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background-color: #fff;
   overflow-y: hidden;
 }
@@ -105,6 +90,12 @@ body {
   flex-direction: column;
   padding: 24px 16px;
   transition: width 0.3s ease;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar-header {
@@ -149,7 +140,7 @@ body {
   text-decoration: none;
   color: white;
   border-radius: 8px;
-  transition: background-color 0.3s, opacity 0.3s; /* Added opacity transition */
+  transition: background-color 0.3s, opacity 0.3s;
   opacity: 0.7;
 }
 
@@ -159,14 +150,11 @@ body {
 }
 
 .nav-item.active {
-  background-color: rgba(255, 255, 255, 0.05); /* Subtle active background */
+  background-color: rgba(255, 255, 255, 0.05);
   opacity: 1;
-  font-weight: 600; /* Make active text bolder */
+  font-weight: 600;
 }
 
-.nav-item.active .nav-icon svg {
-  stroke: var(--primary-color); /* Active icon color */
-}
 .nav-item.active .nav-text{
   color: var(--primary-color);
 }
@@ -177,29 +165,29 @@ body {
   justify-content: center;
 }
 
-.nav-icon svg {
- stroke: white;
- transition: stroke 0.3s;
-}
-
 .nav-text {
   font-size: 14px;
   font-weight: 500;
   color: white;
+  margin-left: 12px;
 }
 
 .main-content {
   flex: 1;
   background-color: #fff;
-  overflow-y: hidden;
+  overflow-y: auto;
   transition: margin-left 0.3s ease;
   padding: 2rem 4rem;
+  margin-left: 280px;
+  height: 100vh;
 }
 
 .main-content.full-width {
   padding-bottom: 80px;
   width: 100%;
   margin: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .bottom-nav {
@@ -251,16 +239,18 @@ body {
 }
 
 /* Responsive adjustments for sidebar and main content */
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .sidebar {
     display: none;
   }
   .main-content {
     margin-left: 0;
     padding: 0;
+    overflow-y: auto;
   }
    .app-container {
     background-color: #0C365A;
+    overflow: auto;
   }
 }
 

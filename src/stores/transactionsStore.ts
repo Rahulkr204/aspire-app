@@ -77,8 +77,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return newTransaction
   }
 
-  console.log(transactions, "<-- tr")
-
   return {
     transactions,
     getCardTransactions,

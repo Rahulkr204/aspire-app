@@ -17,6 +17,17 @@
   box-sizing: border-box;
 }
 
+.main-content::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar,
+.cards-view::-webkit-scrollbar,
+.card-section::-webkit-scrollbar,
+.leftSection::-webkit-scrollbar,
+.rightSection::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 body {
   font-family: 'Open Sans', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
