@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch, reactive, defineAsyncComponent, onUnmo
 import { useCardsStore } from '../stores/cardsStore'
 import { useTransactionsStore } from '../stores/transactionsStore'
 import { message } from 'ant-design-vue'
-
+import { useDeviceDetection } from '../composables/useDeviceDetection'
 
 // Lazy load components that are not needed immediately with loading states
 const CardCarousel = defineAsyncComponent({
@@ -34,6 +34,20 @@ import { Icon } from "@iconify/vue";
 
 const cardsStore = useCardsStore()
 const transactionsStore = useTransactionsStore()
+const { isMobile } = useDeviceDetection()
+
+// Track small mobile screens (≤ 375px)
+const smallScreenWidth = ref(window.innerWidth <= 375)
+
+// Update smallScreenWidth on window resize
+const updateSmallScreenWidth = () => {
+  smallScreenWidth.value = window.innerWidth <= 375
+}
+
+// Computed property to check for small mobile screens
+const isSmallMobile = computed(() => {
+  return isMobile.value && smallScreenWidth.value
+})
 
 const activeTabKey = ref<string>('1')
 const showNewCardModal = ref<boolean>(false)
@@ -50,15 +64,9 @@ const newCard = reactive<NewCardInput>({
   expiryDate: generateExpiryDate(),
   cvv: generateCVV()
 })
-const isMobileView = ref<boolean>(window.innerWidth < 768)
-
-const updateMobileState = (): void => {
-  isMobileView.value = window.innerWidth < 768
-}
 
 onMounted(() => {
-  updateMobileState()
-  window.addEventListener('resize', updateMobileState)
+  window.addEventListener('resize', updateSmallScreenWidth)
 
   const savedCards = localStorage.getItem('cards')
   if (savedCards) {
@@ -71,10 +79,8 @@ onMounted(() => {
       catch (e) { console.error('Error parsing saved transactions:', e) }
   }
 })
-
-// Cleanup event listeners to prevent memory leaks
 onUnmounted(() => {
-  window.removeEventListener('resize', updateMobileState)
+  window.removeEventListener('resize', updateSmallScreenWidth)
 })
 
 const selectedCard = computed<Card | undefined>(() => {
@@ -199,8 +205,8 @@ watch(
 </script>
 
 <template>
-    <div class="cards-view">
-        <div class="mobile-header" v-if="isMobileView">
+    <div class="cards-view" :class="{ 'mobile-view': isMobile, 'small-mobile-view': isSmallMobile }">
+        <div class="mobile-header" v-if="isMobile">
             <div class="logo-container">
                 <img class="mobile-logo"
                     src="https://cdn.prod.website-files.com/5ed5b60be1889f546024ada0/672b1e9d21d98dcfc6d10d5a_aspire-logo-p-500.png"
@@ -275,9 +281,9 @@ watch(
         </div>
 
         <a-modal destroyOnClose v-model:open="showNewCardModal" title="Add New Card" @cancel="closeNewCardModal"
-            :width="isMobileView ? '100%' : 520"
-            :style="isMobileView ? { top: '0', maxWidth: '100%', margin: '0', height: '100vh', paddingBottom: '0px' } : {}"
-            :wrapClassName="isMobileView ? 'full-screen-modal' : ''" :footer="null">
+            :width="isMobile ? '100%' : 520"
+            :style="isMobile ? { top: '0', maxWidth: '100%', margin: '0', height: '100vh', paddingBottom: '0px' } : {}"
+            :wrapClassName="isMobile ? 'full-screen-modal' : ''" :footer="null">
             <a-form ref="formRef" class="card-form" :model="newCard">
                 <a-form-item name="name" label="Card Holder" class="custom-form-item" required
                     :rules="[{ required: true, message: 'Please enter card holder name' }]">
@@ -677,13 +683,6 @@ watch(
     border-color: #01D167 !important;
 }
 
-.full-screen-modal :deep(.ant-modal) {
-    max-width: 100%;
-    top: 0;
-    padding-bottom: 0;
-    margin: 0;
-}
-
 .full-screen-modal :deep(.ant-modal-content) {
     display: flex;
     flex-direction: column;
@@ -691,155 +690,136 @@ watch(
     background-color: #0C365A;
 }
 
-@media (max-width: 768px) {
-    .cards-view {
-        padding: 0;
-        padding-top: 7rem;
-    }
-
-    .custom-tabs .ant-tabs-content-holder {
-        border: none;
-        margin-top: 0;
-        box-shadow: none;
-    }
-
-    .custom-tabs .ant-tabs-nav {
-        padding-left: 1rem;
-        margin-bottom: 16px !important;
-    }
-
-    .custom-tabs .ant-tabs-tab {
-        padding: 8px 0;
-        margin-right: 16px;
-    }
-
-    .desktop-only {
-        display: none !important;
-    }
-
-    .mobile-header {
-        display: flex;
-        z-index: 1000;
-    }
-
-    .mobile-balance-section {
-        margin-bottom: 0;
-    }
-
-    .mobile-new-card-btn {
-        position: static;
-    }
-
-    .tabs-container {
-        background-color: #0C365A;
-    }
-
-    .card-visibility {
-        padding: 0 1rem;
-    }
-
-    .card-carousel-container {
-        padding: 0 0.5rem;
-    }
-
-    .card-section {
-        flex-direction: column;
-        box-shadow: none;
-        border: none;
-        padding: 0;
-        background-color: transparent;
-        border-radius: 12px;
-        overflow-y: hidden;
-        min-height: 650px;
-        height: auto;
-        contain: content;
-    }
-
-    .leftSection,
-    .rightSection {
-        width: 100%;
-        min-height: auto;
-        height: auto;
-    }
-
-    .leftSection {
-        margin: 0;
-        padding: 0;
-        min-height: 350px;
-    }
-
-    .rightSection {
-        background-color: white;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        padding: 1rem;
-        margin: 0;
-        min-height: 300px;
-    }
-
-    .card-carousel-container {
-        min-height: 200px;
-    }
-
-    .card-carousel-loading {
-        height: 180px;
-    }
-
-    .transactions-loading {
-        height: 250px;
-    }
-
-    .transactions-section {
-        background-color: inherit;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-        padding: 0 16px;
-        margin-top: 16px;
-        position: static;
-        z-index: auto;
-    }
-
-    .desktop-transactions-only {
-        display: none !important;
-    }
-
-    .full-screen-modal .ant-modal {
-        max-width: 100%;
-        top: 0;
-        padding-bottom: 0;
-        margin: 0;
-    }
-
-    .full-screen-modal .ant-modal-content {
-        display: flex;
-        flex-direction: column;
-        top: 20%;
-        position: absolute;
-        border-radius: 0;
-    }
-
-    .full-screen-modal .ant-modal-body {
-        flex-grow: 1;
-        overflow-y: auto;
-    }
+.cards-view.mobile-view {
+    padding: 0;
+    padding-top: 7rem;
 }
 
-@media (max-width: 375px) {
-    .mobile-balance-amount .mobile-amount {
-        font-size: 20px;
-    }
-
-    .mobile-header {
-        padding-bottom: 8px;
-    }
-
-    .custom-tabs .ant-tabs-tab:first-child {
-        min-width: 100px;
-    }
-
-    .custom-tabs .ant-tabs-tab:nth-child(2) {
-        min-width: 120px;
-    }
+.mobile-view .custom-tabs .ant-tabs-content-holder {
+    border: none;
+    margin-top: 0;
+    box-shadow: none;
 }
+
+.mobile-view .custom-tabs .ant-tabs-nav {
+    padding-left: 1rem;
+    margin-bottom: 16px !important;
+}
+
+.mobile-view .custom-tabs .ant-tabs-tab {
+    padding: 8px 0;
+    margin-right: 16px;
+}
+
+.mobile-view .desktop-only {
+    display: none !important;
+}
+
+.mobile-view .mobile-header {
+    display: flex;
+    z-index: 1000;
+}
+
+.mobile-view .mobile-balance-section {
+    margin-bottom: 0;
+}
+
+.mobile-view .mobile-new-card-btn {
+    position: static;
+}
+
+.mobile-view .tabs-container {
+    background-color: #0C365A;
+}
+
+.mobile-view .card-visibility {
+    padding: 0 1rem;
+}
+
+.mobile-view .card-carousel-container {
+    padding: 0 0.5rem;
+}
+
+.mobile-view .card-section {
+    flex-direction: column;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 12px;
+    overflow-y: hidden;
+    min-height: 650px;
+    height: auto;
+    contain: content;
+}
+
+.mobile-view .leftSection,
+.mobile-view .rightSection {
+    width: 100%;
+    min-height: auto;
+    height: auto;
+}
+
+.mobile-view .leftSection {
+    margin: 0;
+    padding: 0;
+    min-height: 350px;
+}
+
+.mobile-view .rightSection {
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin: 0;
+    min-height: 300px;
+}
+
+.mobile-view .card-carousel-container {
+    min-height: 200px;
+}
+
+.mobile-view .card-carousel-loading {
+    height: 180px;
+}
+
+.mobile-view .transactions-loading {
+    height: 250px;
+}
+
+.mobile-view .transactions-section {
+    background-color: inherit;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding: 0 16px;
+    margin-top: 16px;
+    position: static;
+    z-index: auto;
+}
+
+.mobile-view .desktop-transactions-only {
+    display: none !important;
+}
+
+.mobile-view .full-screen-modal :deep(.ant-modal) {
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+    margin: 0;
+}
+
+.mobile-view .full-screen-modal :deep(.ant-modal-content) {
+    display: flex;
+    flex-direction: column;
+    top: 20%;
+    position: absolute;
+    border-radius: 0;
+}
+
+.mobile-view .full-screen-modal :deep(.ant-modal-body) {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
 
 .error-message {
     color: #ff4d4f;

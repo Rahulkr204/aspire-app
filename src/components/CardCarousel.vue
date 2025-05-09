@@ -2,6 +2,7 @@
 import { ref, watch, onMounted, nextTick, onUpdated } from 'vue'
 import CardComponent from './CardComponent.vue'
 import { Card } from '../types'
+import { useDeviceDetection } from '../composables/useDeviceDetection'
 
 interface Props {
   cards: Card[];
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { isMobile } = useDeviceDetection()
 
 const emit = defineEmits<{
   'update:selectedIndex': [index: number]
@@ -68,7 +70,6 @@ const scrollToActiveCard = (): void => {
     const activeCard = carouselElement.querySelector('.active-card')
 
     if (activeCard) {
-        // Calculate exact position for precise scrolling
         const scrollPos = (activeCard as HTMLElement).offsetLeft
 
         carouselElement.scrollTo({
@@ -80,13 +81,13 @@ const scrollToActiveCard = (): void => {
 </script>
 
 <template>
-  <div class="card-carousel-container">
+  <div class="card-carousel-container" :class="{ 'mobile-carousel': isMobile }">
     <div class="card-carousel" ref="carouselRef">
       <div
         v-for="(card, index) in cards"
         :key="card.id"
         class="card-item"
-        :class="{ 'active-card': isCardActive(index) }"
+        :class="{ 'active-card': isCardActive(index), 'mobile-card-item': isMobile }"
         :style="{
           opacity: isCardActive(index) ? 1 : 0.7
         }"
@@ -100,12 +101,12 @@ const scrollToActiveCard = (): void => {
     </div>
 
     <div v-if="cards.length > 1" class="carousel-navigation">
-      <div class="carousel-indicators">
+      <div class="carousel-indicators" :class="{ 'mobile-indicators': isMobile }">
         <div
           v-for="(card, index) in cards"
           :key="`indicator-${card.id}`"
           class="carousel-dot"
-          :class="{ 'active': isCardActive(index) }"
+          :class="{ 'active': isCardActive(index), 'mobile-dot': isMobile }"
           @click="selectCard(index)"
         ></div>
       </div>
@@ -146,6 +147,10 @@ const scrollToActiveCard = (): void => {
     transition: transform 0.7s ease, opacity 0.8s ease;
 }
 
+.mobile-card-item {
+    padding: 0;
+}
+
 .card-item.active-card {
     z-index: 2;
 }
@@ -163,6 +168,10 @@ const scrollToActiveCard = (): void => {
     gap: 4px;
 }
 
+.mobile-indicators {
+    margin-top: 0;
+}
+
 .carousel-dot {
     width: 8px;
     height: 8px;
@@ -174,6 +183,11 @@ const scrollToActiveCard = (): void => {
     margin: 0 4px;
 }
 
+.mobile-dot {
+    width: 6px;
+    height: 6px;
+}
+
 .carousel-dot.active {
     width: 20px;
     height: 8px;
@@ -181,26 +195,7 @@ const scrollToActiveCard = (): void => {
     opacity: 1;
 }
 
-@media (max-width: 768px) {
-    .card-carousel-container {
-        gap: 12px;
-    }
-
-    .card-item {
-        padding: 0;
-    }
-
-    .carousel-indicators {
-        margin-top: 0;
-    }
-
-    .carousel-dot {
-        width: 6px;
-        height: 6px;
-    }
-
-    .carousel-dot.active {
-        width: 16px;
-    }
+.mobile-dot.active {
+    width: 16px;
 }
 </style>

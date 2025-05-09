@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Icon } from "@iconify/vue";
 import { Card } from '../types'
+import { useDeviceDetection } from '../composables/useDeviceDetection'
 
 interface Props {
   card: Card;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { isMobile } = useDeviceDetection()
 
 const emit = defineEmits<{
   click: []
@@ -53,11 +55,11 @@ const getCardIconByType = (type: string): string => {
 </script>
 
 <template>
-    <div :class="cardClassObject" @click="handleClick">
+    <div :class="[cardClassObject, { 'mobile-card': isMobile }]" @click="handleClick">
         <div class="card-header">
             <div class="aspire-logo">
                 <img src="../assets/logo.svg" alt="Aspire Logo" width="24" height="24">
-                <span class="fth-logo mobile-logo">aspire</span>
+                <span class="fth-logo" :class="{ 'mobile-logo': isMobile }">aspire</span>
             </div>
             <div v-if="props.card.frozen" class="frozen-badge">FROZEN</div>
         </div>
@@ -104,7 +106,7 @@ const getCardIconByType = (type: string): string => {
 
         <div class="card-footer">
             <div class="card-network">
-                <Icon :icon="getCardIconByType(card.type)" class="card-icon" width="5rem" height="5rem"
+                <Icon :icon="getCardIconByType(card.type)" class="card-icon" :width="isMobile ? '3.5rem' : '5rem'" :height="isMobile ? '3.5rem' : '5rem'"
                     style="color: #fff" />
             </div>
         </div>
@@ -132,12 +134,29 @@ const getCardIconByType = (type: string): string => {
     opacity: 0.7;
 }
 
+.mobile-card {
+    min-width: unset;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    padding: 0 1.5rem;
+}
+
+.mobile-card:hover {
+    transform: none;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
 .card-header {
     display: flex;
     flex-direction: row-reverse;
     justify-content: space-between;
     align-items: center;
     padding: 1.6rem 0;
+}
+
+.mobile-card .card-header {
+    padding: 0.8rem 0;
 }
 
 .card-number-container {
@@ -147,6 +166,10 @@ const getCardIconByType = (type: string): string => {
     justify-content: flex-start;
     align-items: center;
     gap: 24px;
+}
+
+.mobile-card .card-number-container {
+    gap: 12px;
 }
 
 .card-number-group {
@@ -161,6 +184,13 @@ const getCardIconByType = (type: string): string => {
     width: 18%;
 }
 
+.mobile-card .card-number-group {
+    font-size: 1.2rem;
+    min-width: 48px;
+    width: 100%;
+    gap: 8px;
+}
+
 .dots {
     width: 8px;
     height: 8px;
@@ -168,6 +198,11 @@ const getCardIconByType = (type: string): string => {
     background-color: #fff;
     display: inline-block;
     margin: 0 2px;
+}
+
+.mobile-card .dots {
+    width: 6px;
+    height: 6px;
 }
 
 .aspire-logo {
@@ -185,6 +220,10 @@ const getCardIconByType = (type: string): string => {
     padding-left: 8px;
 }
 
+.mobile-logo {
+    font-size: 1.2rem;
+}
+
 .frozen-badge {
     background-color: rgba(255, 255, 255, 0.3);
     padding: 4px 8px;
@@ -200,10 +239,20 @@ const getCardIconByType = (type: string): string => {
     flex-basis: 20%;
 }
 
+.mobile-card .card-holder {
+    font-size: 1.5rem;
+}
+
 .card-number {
     width: auto;
     font-size: 1.6rem;
     margin-bottom: 16px;
+}
+
+.mobile-card .card-number {
+    font-size: 1.2rem;
+    width: auto;
+    margin-bottom: 8px;
 }
 
 .card-footer {
@@ -214,10 +263,18 @@ const getCardIconByType = (type: string): string => {
     font-weight: 600;
 }
 
+.mobile-card .card-footer {
+    margin-top: 0;
+}
+
 .card-validity {
     display: flex;
     gap: 20px;
     margin-top: 4px;
+}
+
+.mobile-card .card-validity {
+    gap: 10px;
 }
 
 .label {
@@ -227,65 +284,13 @@ const getCardIconByType = (type: string): string => {
     letter-spacing: 0;
 }
 
+.mobile-card .label {
+    font-size: 0.8rem;
+}
+
 .cvv {
     display: flex;
     flex-direction: row;
     align-items: center;
-}
-
-@media (max-width: 768px) {
-    .card-component {
-        min-width: unset;
-        width: 100%;
-        height: 100%;
-        border-radius: 10px;
-        padding: 0 1.5rem;
-    }
-    .card-header {
-        padding: 0.8rem 0;
-    }
-    .card-component:hover {
-        transform: none;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-    }
-    .fth-logo {
-        font-size: 1.2rem;
-    }
-    .card-holder {
-        font-size: 1.5rem;
-    }
-    .card-number {
-        font-size: 1.2rem;
-        width: auto;
-        margin-bottom: 8px;
-    }
-    .card-number-container {
-        gap: 12px
-    }
-    .card-number-group {
-        font-size: 1.2rem;
-        min-width: 48px;
-    }
-    .dots {
-        width: 6px;
-        height: 6px;
-    }
-    .card-validity {
-        gap: 10px;
-    }
-    .label {
-        font-size: 0.8rem;
-    }
-    .card-footer {
-        margin-top: 0;
-    }
-    .card-network .card-icon {
-        width: 3.5rem !important;
-        height: 3.5rem !important;
-    }
-    .card-number-group {
-        width: 100%;
-        gap: 8px;
-    }
 }
 </style>

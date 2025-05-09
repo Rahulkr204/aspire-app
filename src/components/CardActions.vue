@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCardsStore } from '../stores/cardsStore'
 import { Icon } from "@iconify/vue";
+import { useDeviceDetection } from '../composables/useDeviceDetection'
 
 interface Props {
   cardId: number;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { isMobile } = useDeviceDetection()
 
 const cardsStore = useCardsStore()
 
@@ -17,41 +19,56 @@ const toggleFreeze = (): void => {
 </script>
 
 <template>
-    <div class="card-actions">
+    <div class="card-actions" :class="{ 'mobile-actions': isMobile }">
         <div class="action-button" @click="toggleFreeze">
-            <div class="action-icon">
-                <Icon icon="charm:snowflake" width="24" height="24" style="color: #fff" v-if="!isFrozen" />
-                <Icon icon="mdi:freeze-advisory" width="24" height="24" style="color: #fff" v-if="isFrozen" />
+            <div class="action-icon" :class="{ 'mobile-icon': isMobile }">
+                <Icon :icon="!isFrozen ? 'charm:snowflake' : 'mdi:freeze-advisory'"
+                      :width="isMobile ? '18' : '24'"
+                      :height="isMobile ? '18' : '24'"
+                      style="color: #fff" />
             </div>
-            <div class="action-text">{{ isFrozen ? 'Unfreeze' : 'Freeze' }}<br>card</div>
+            <div class="action-text" :class="{ 'mobile-text': isMobile }">
+                {{ isFrozen ? 'Unfreeze' : 'Freeze' }}<br>card
+            </div>
         </div>
 
         <div class="action-button">
-            <div class="action-icon">
-                <Icon icon="famicons:speedometer" width="20" height="20" style="color: #fff" />
+            <div class="action-icon" :class="{ 'mobile-icon': isMobile }">
+                <Icon icon="famicons:speedometer"
+                      :width="isMobile ? '18' : '20'"
+                      :height="isMobile ? '18' : '20'"
+                      style="color: #fff" />
             </div>
-            <div class="action-text">Set spend<br>limit</div>
+            <div class="action-text" :class="{ 'mobile-text': isMobile }">Set spend<br>limit</div>
         </div>
 
         <div class="action-button">
-            <div class="action-icon gpay-icon">
-                <Icon icon="devicon:google" width="20" height="20" />
+            <div class="action-icon gpay-icon" :class="{ 'mobile-icon': isMobile }">
+                <Icon icon="devicon:google"
+                      :width="isMobile ? '18' : '20'"
+                      :height="isMobile ? '18' : '20'" />
             </div>
-            <div class="action-text">Add to<br>GPay</div>
+            <div class="action-text" :class="{ 'mobile-text': isMobile }">Add to<br>GPay</div>
         </div>
 
         <div class="action-button">
-            <div class="action-icon">
-                <Icon icon="tabler:reload" width="20" height="20" style="color: #fff" />
+            <div class="action-icon" :class="{ 'mobile-icon': isMobile }">
+                <Icon icon="tabler:reload"
+                      :width="isMobile ? '18' : '20'"
+                      :height="isMobile ? '18' : '20'"
+                      style="color: #fff" />
             </div>
-            <div class="action-text">Replace<br>card</div>
+            <div class="action-text" :class="{ 'mobile-text': isMobile }">Replace<br>card</div>
         </div>
 
         <div class="action-button">
-            <div class="action-icon">
-                <Icon icon="ic:round-delete" width="20" height="20" style="color: #fff" />
+            <div class="action-icon" :class="{ 'mobile-icon': isMobile }">
+                <Icon icon="ic:round-delete"
+                      :width="isMobile ? '18' : '20'"
+                      :height="isMobile ? '18' : '20'"
+                      style="color: #fff" />
             </div>
-            <div class="action-text">Cancel<br>card</div>
+            <div class="action-text" :class="{ 'mobile-text': isMobile }">Cancel<br>card</div>
         </div>
     </div>
 </template>
@@ -64,6 +81,10 @@ const toggleFreeze = (): void => {
   border-radius: 12px;
   padding: 0.8rem 1rem;
   width: 100%;
+}
+
+.mobile-actions {
+  border-radius: 12px 12px 0 0;
 }
 
 .action-button {
@@ -93,6 +114,11 @@ const toggleFreeze = (): void => {
   border-radius: 50%;
 }
 
+.mobile-icon {
+  width: 24px;
+  height: 24px;
+}
+
 .action-icon svg {
   stroke: #325BAF;
 }
@@ -109,20 +135,7 @@ const toggleFreeze = (): void => {
   line-height: 1.2;
 }
 
-@media (max-width: 768px) {
-    .card-actions {
-        border-radius: 12px 12px 0 0;
-    }
-    .action-text {
-        font-size: 10px;
-    }
-    .action-icon {
-        width: 24px;
-        height: 24px;
-    }
-    .action-icon svg {
-        width: 18px;
-        height: 18px;
-    }
+.mobile-text {
+  font-size: 10px;
 }
 </style>

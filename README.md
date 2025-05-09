@@ -1,10 +1,10 @@
 # Aspire App - Vue 3 Implementation
 
-This project is a Vue 3 implementation of the Aspire application design, following the requirements specified in the challenge.
+Aspireapp assignment submission
 
 ## Features
 
-- Interactive debit card management
+- Debit card management
 - Add new cards with randomly generated card numbers and expiry dates
 - Freeze/unfreeze cards functionality
 - View transaction history
@@ -18,7 +18,7 @@ This project is a Vue 3 implementation of the Aspire application design, followi
 - Pinia for state management
 - Ant Design Vue for UI components
 - Vite for build tooling
-- Oh-my-icons for icons
+- Iconify for icons
 
 ## Getting Started
 
@@ -37,6 +37,8 @@ This project is a Vue 3 implementation of the Aspire application design, followi
 
 - Navigate to the Cards section to see the main functionality
 - Click "New card" to add a new debit card
+    - Generate card number, validity and cvv randomly
+    - Form Validations
 - Click "Show card number" to toggle visibility of the card numbers
 - Use the "Freeze card" button to freeze/unfreeze a card
 - The carousel dots at the bottom can be used to navigate between multiple cards
@@ -48,3 +50,7 @@ This project is a Vue 3 implementation of the Aspire application design, followi
 - `/src/stores` - Pinia stores for state management
 - `/src/router` - Vue Router configuration
 - `/src/assets` - Static assets
+
+## Screenshots
+![Desktop View - Cards Page](./src/assets/screenshots/desktop.png)
+![Mobile View - Cards Page](./src/assets/screenshots/mobile.png)

@@ -1,29 +1,14 @@
 <script setup>
-import { ref, computed, onMounted, watchEffect } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { Icon } from "@iconify/vue";
+import { useDeviceDetection } from './composables/useDeviceDetection'
 
 const route = useRoute()
 const router = useRouter()
 const currentRoute = computed(() => route.path)
 
-const isMobile = ref(window.innerWidth < 768)
-
-const updateIsMobile = () => {
-  isMobile.value = window.innerWidth < 768
-}
-
-onMounted(() => {
-  window.addEventListener('resize', updateIsMobile)
-  updateIsMobile() // Initial check
-})
-
-watchEffect(() => {
-  // Clean up the event listener when the component is unmounted
-  return () => {
-    window.removeEventListener('resize', updateIsMobile)
-  }
-})
+const { isMobile } = useDeviceDetection()
 
 const navigateTo = (path) => {
   router.push(path)
@@ -39,7 +24,7 @@ const menuItems = [
 </script>
 
 <template>
-    <div class="app-container">
+    <div class="app-container" :class="{ 'mobile-container': isMobile }">
         <aside class="sidebar" v-if="!isMobile">
             <div class="sidebar-header">
                 <div class="logo">
@@ -55,7 +40,7 @@ const menuItems = [
                 <router-link v-for="item in menuItems" :key="item.path" :to="item.path" class="nav-item"
                     :class="{ active: currentRoute === item.path }">
                     <Icon :icon="item.icon" width="20" height="20" :style="currentRoute === item.path ? { color: '#01D167' } : { color: '#fff' }" />
-                    <span class="nav-text">{{ item.name === 'Profile' ? 'Settings' : item.name }}</span>
+                    <span class="nav-text">{{ item.name }}</span>
                 </router-link>
             </nav>
         </aside>
@@ -80,6 +65,11 @@ const menuItems = [
   height: 100vh;
   background-color: #fff;
   overflow-y: hidden;
+}
+
+.mobile-container {
+  background-color: #0C365A;
+  overflow: auto;
 }
 
 .sidebar {
@@ -186,6 +176,7 @@ const menuItems = [
   padding-bottom: 80px;
   width: 100%;
   margin: 0;
+  padding: 0;
   height: 100vh;
   overflow-y: auto;
 }
@@ -236,27 +227,5 @@ const menuItems = [
 .bottom-nav-text {
   font-size: 10px;
   font-weight: 500;
-}
-
-/* Responsive adjustments for sidebar and main content */
-@media (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
-  .main-content {
-    margin-left: 0;
-    padding: 0;
-    overflow-y: auto;
-  }
-   .app-container {
-    background-color: #0C365A;
-    overflow: auto;
-  }
-}
-
-@media (min-width: 768px) {
-  .bottom-nav {
-    display: none; /* Hide bottom nav on desktop */
-  }
 }
 </style>
